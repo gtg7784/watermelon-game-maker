@@ -10,12 +10,5 @@ body {max-width: 500px;width: 100%; margin: 0px auto;}
 .result_box{background:#fff;}
 .them_img img, .result_box img{display:block;margin:0 auto;height:100%;}
 #complete{display:block;margin-top:20px;padding:15px 0;width:100%;text-align:center;color:#fff;text-decoration: none;background-color: steelblue;}
-
-
-/* #canvas {
-  height: 600px;
-  width: 600px;
-  background-color: #ffffff;
-  cursor: default;
-  border: 1px solid black;
-} */
+.result_img{width: 48%; height: auto; margin: 1%;}
+#result{display: flex;flex-direction: row;flex-wrap: wrap;}
