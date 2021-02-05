@@ -2,6 +2,8 @@ var canvas  = $("#canvas"),
     context = canvas.get(0).getContext("2d")
     $result = $('#result');
 
+var img_list = [];
+
 $('#photoBtn').on('change', function(){
     if (this.files && this.files[0]) {
       if (this.files[0].type.match(/^image\//) ) {
@@ -16,13 +18,23 @@ $('#photoBtn').on('change', function(){
                aspectRatio: 1 / 1
              });
              $('#complete').click(function() {
-                // Get a string base 64 data url
+                if(img_list.length > 12) {
+                  alert("이미지가 너무 많아요")
+                }
                 var croppedImageDataURL = canvas.cropper('getCroppedCanvas').toDataURL("image/png"); 
-                $result.append( $('<img>').attr('src', croppedImageDataURL) );
+                var img = $('<img>').attr('class', 'result_img').attr('src', croppedImageDataURL);
+                img_list.push(croppedImageDataURL);
+                $result.append(img);
+                if(img_list.length < 12){
+                  $('#complete').html(`${img_list.length}/12개 업로드`)
+                } else {
+                  $('#complete').html(`이미지 업로드 완료`)
+                  // TODO: deploy code
+                }
              });
              $('#resetPhoto').click(function() {
                canvas.cropper('reset');
-               $result.empty();
+               canvas.empty();
              });
            };
            img.src = evt.target.result;
