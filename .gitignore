@@ -130,3 +130,9 @@ dmypy.json
 
 # Visual Studio Code
 .vscode/
+
+# tmp files
+tmp/
+
+# OSX
+.DS_Store
