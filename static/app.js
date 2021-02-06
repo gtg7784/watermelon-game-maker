@@ -67,9 +67,10 @@ $('#photoBtn').on('change', function(){
             }
           });
           $('#resetPhoto').click(function() {
-            canvas.get(0).getContext("2d").clearRect(0, 0, canvas.get(0).width, canvas.get(0).height);
             canvas.cropper('destroy');
+            canvas.get(0).getContext("2d").clearRect(0, 0, canvas.get(0).width, canvas.get(0).height);
             $('#complete').unbind();
+            $('#resetPhoto').unbind();
           });
         };
         img.src = evt.target.result;
