@@ -19,53 +19,62 @@ function dataURItoBlob(dataURI) {
   return new Blob([ab], {type: mimeString});
 }
 
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 $('#photoBtn').on('change', function(){
     if (this.files && this.files[0]) {
-      if (this.files[0].type.match(/^image\//) ) {
-        var reader = new FileReader();
-        reader.onload = function(evt) {
-           var img = new Image();
-           img.onload = function() {
-             context.canvas.height = img.height;
-             context.canvas.width  = img.width;
-             context.drawImage(img, 0, 0);
-             var cropper = canvas.cropper({
-               aspectRatio: 1 / 1
-             });
-             $('#complete').click(function() {
-              if(lists.length < 11){
-                var croppedImageDataURL = canvas.cropper('getCroppedCanvas').toDataURL("image/png"); 
-                var img = $('<img>').attr('class', 'result_img').attr('src', croppedImageDataURL);
-                var blob = dataURItoBlob(croppedImageDataURL);
-                formData.append(names[lists.length], blob);
-                lists.push(blob);
-                $result.append(img);
-                $('#complete').html(`${lists.length}/11개 업로드`);
-              } else {
-                $('#complete').html(`이미지 업로드 완료`)
-                $.ajax({
-                  url: "/upload",
-                  processData: false,
-                  contentType: false,
-                  data: formData,
-                  type: 'POST',
-                  success: function(data) {
-                    console.log(data)
-                  }
-                });
-              }
-            });
-            $('#resetPhoto').click(function() {
-              canvas.cropper('reset');
-              canvas.empty();
-            });
-          };
-          img.src = evt.target.result;
-      };
-      reader.readAsDataURL(this.files[0]);
-    } else {
-      alert("Invalid file type! Please select an image file.");
-    }
+      var reader = new FileReader();
+      reader.onload = function(evt) {
+         var img = new Image();
+         img.onload = function() {
+           context.canvas.height = img.height;
+           context.canvas.width  = img.width;
+           context.drawImage(img, 0, 0);
+           var cropper = canvas.cropper({
+             aspectRatio: 1 / 1
+           });
+           $('#complete').click(function() {
+            if(lists.length < 11){
+              var croppedImageDataURL = canvas.cropper('getCroppedCanvas').toDataURL("image/png"); 
+              var img = $('<img>').attr('class', 'result_img').attr('src', croppedImageDataURL);
+              var blob = dataURItoBlob(croppedImageDataURL);
+              var name = names[lists.length];
+
+              formData.append(name, blob, name);
+              lists.push(blob);
+              $result.append(img);
+              $('#complete').html(`${lists.length}/11개 업로드`);
+            } else {
+              $('#complete').html(`이미지 업로드 완료`)
+              $.ajax({
+                url: "/upload",
+                processData: false,
+                contentType: false,
+                data: formData,
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("uuid", uuidv4());
+                },
+                success: function(data) {
+                  console.log(data)
+                }
+              });
+            }
+          });
+          $('#resetPhoto').click(function() {
+            canvas.get(0).getContext("2d").clearRect(0, 0, canvas.get(0).width, canvas.get(0).height);
+            canvas.cropper('destroy');
+            $('#complete').unbind();
+          });
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(this.files[0]);
   } else {
     alert('No file(s) selected.');
   }
