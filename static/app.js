@@ -1,8 +1,23 @@
 var canvas  = $("#canvas"),
     context = canvas.get(0).getContext("2d")
     $result = $('#result');
+var lists = [];
+var names = ["ad", "0c", "d0", "74", "13", "03", "66", "84", "5f", "56", "50"];
+var formData = new FormData();
 
-var img_list = [];
+function dataURItoBlob(dataURI) {
+  var byteString = atob(dataURI.split(',')[1]);
+
+  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+
+  return new Blob([ab], {type: mimeString});
+}
 
 $('#photoBtn').on('change', function(){
     if (this.files && this.files[0]) {
@@ -18,34 +33,40 @@ $('#photoBtn').on('change', function(){
                aspectRatio: 1 / 1
              });
              $('#complete').click(function() {
-                if(img_list.length > 12) {
-                  alert("이미지가 너무 많아요")
-                }
+              if(lists.length < 11){
                 var croppedImageDataURL = canvas.cropper('getCroppedCanvas').toDataURL("image/png"); 
                 var img = $('<img>').attr('class', 'result_img').attr('src', croppedImageDataURL);
-                img_list.push(croppedImageDataURL);
+                var blob = dataURItoBlob(croppedImageDataURL);
+                formData.append(names[lists.length], blob);
+                lists.push(blob);
                 $result.append(img);
-                if(img_list.length < 12){
-                  $('#complete').html(`${img_list.length}/12개 업로드`)
-                } else {
-                  $('#complete').html(`이미지 업로드 완료`)
-                  // TODO: deploy code
-                }
-             });
-             $('#resetPhoto').click(function() {
-               canvas.cropper('reset');
-               canvas.empty();
-             });
-           };
-           img.src = evt.target.result;
-				};
-        reader.readAsDataURL(this.files[0]);
-      }
-      else {
-        alert("Invalid file type! Please select an image file.");
-      }
+                $('#complete').html(`${lists.length}/11개 업로드`);
+              } else {
+                $('#complete').html(`이미지 업로드 완료`)
+                $.ajax({
+                  url: "/upload",
+                  processData: false,
+                  contentType: false,
+                  data: formData,
+                  type: 'POST',
+                  success: function(data) {
+                    console.log(data)
+                  }
+                });
+              }
+            });
+            $('#resetPhoto').click(function() {
+              canvas.cropper('reset');
+              canvas.empty();
+            });
+          };
+          img.src = evt.target.result;
+      };
+      reader.readAsDataURL(this.files[0]);
+    } else {
+      alert("Invalid file type! Please select an image file.");
     }
-    else {
-      alert('No file(s) selected.');
-    }
+  } else {
+    alert('No file(s) selected.');
+  }
 });
